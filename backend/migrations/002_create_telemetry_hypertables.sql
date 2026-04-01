@@ -1,53 +1,38 @@
--- LogiCore: TimescaleDB Telemetry Hypertables
--- Run: psql -U postgres -d logicore -f migrations/002_create_telemetry_hypertables.sql
--- Requires: CREATE EXTENSION IF NOT EXISTS timescaledb;
-
--- ==========================================
--- GPS TELEMETRY (Hypertable)
--- ==========================================
 CREATE TABLE IF NOT EXISTS telemetry_gps (
-    time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    device_id VARCHAR(50) NOT NULL,
-    trip_id UUID,
-    lat DECIMAL(10, 6) NOT NULL,
-    lng DECIMAL(10, 6) NOT NULL,
-    speed_kmh DECIMAL(6, 2),
-    ignition BOOLEAN DEFAULT TRUE,
-    heading DECIMAL(5, 2)
+  time timestamptz NOT NULL,
+  device_id varchar(100),
+  trip_id integer,
+  lat decimal(10,7),
+  lng decimal(10,7),
+  speed_kmh decimal(5,2),
+  ignition boolean,
+  PRIMARY KEY (time, device_id)
 );
 
--- Convert to hypertable (TimescaleDB)
--- This will fail gracefully if TimescaleDB is not installed
+CREATE TABLE IF NOT EXISTS telemetry_inventory (
+  time timestamptz NOT NULL,
+  sensor_id varchar(100),
+  factory_id integer,
+  material_type varchar(100),
+  fill_percent integer,
+  weight_kg decimal(10,2),
+  threshold_alert boolean,
+  PRIMARY KEY (time, sensor_id)
+);
+
+-- Try to create hypertables (might fail if TimescaleDB not available, which is okay)
 DO $$
 BEGIN
     PERFORM create_hypertable('telemetry_gps', 'time', if_not_exists => TRUE);
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'TimescaleDB not available — telemetry_gps remains a regular table';
+EXCEPTION
+    WHEN undefined_function THEN
+        RAISE NOTICE 'TimescaleDB not installed, keeping regular tables.';
 END $$;
 
-CREATE INDEX IF NOT EXISTS idx_telemetry_gps_trip ON telemetry_gps(trip_id, time DESC);
-CREATE INDEX IF NOT EXISTS idx_telemetry_gps_device ON telemetry_gps(device_id, time DESC);
-
--- ==========================================
--- INVENTORY TELEMETRY (Hypertable)
--- ==========================================
-CREATE TABLE IF NOT EXISTS telemetry_inventory (
-    time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    sensor_id VARCHAR(50) NOT NULL,
-    factory_id UUID,
-    material_type VARCHAR(100),
-    fill_percent DECIMAL(5, 2),
-    weight_kg DECIMAL(10, 2),
-    threshold_alert BOOLEAN DEFAULT FALSE
-);
-
--- Convert to hypertable
 DO $$
 BEGIN
     PERFORM create_hypertable('telemetry_inventory', 'time', if_not_exists => TRUE);
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'TimescaleDB not available — telemetry_inventory remains a regular table';
+EXCEPTION
+    WHEN undefined_function THEN
+        RAISE NOTICE 'TimescaleDB not installed, keeping regular tables.';
 END $$;
-
-CREATE INDEX IF NOT EXISTS idx_telemetry_inventory_factory ON telemetry_inventory(factory_id, time DESC);
-CREATE INDEX IF NOT EXISTS idx_telemetry_inventory_sensor ON telemetry_inventory(sensor_id, time DESC);

@@ -1,58 +1,55 @@
-/**
- * Socket.io room management for LogiCore.
- * Each trip gets its own room (room name = trip ID).
- * - Manager joins all rooms
- * - Driver joins only their trip's room
- * - Supplier joins rooms for their pickups
- * - Gate joins the room for the trip they just scanned
- */
+const { Server } = require('socket.io');
 
-function setupSocketHandlers(io) {
-    io.on('connection', (socket) => {
-        console.log(`🔌 Client connected: ${socket.id}`);
+// Hardcode cors for now, or match server.js cors if corsConfig doesn't exist.
+// Based on the user instruction: 
+// const corsConfig = require('./config/cors'); 
+// But in the user's snippet, it seems to assume there's a corsConfig.
+// Let's create a minimal config or just use the user's exact code if there's a config.
+// The user explicitly provided:
+let io;
 
-        // Join a specific trip room
-        socket.on('join:trip', (tripId) => {
-            socket.join(tripId);
-            console.log(`📡 ${socket.id} → room: ${tripId}`);
-        });
+function initSocket(httpServer) {
+  io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
+    }
+  });
 
-        // Leave a trip room
-        socket.on('leave:trip', (tripId) => {
-            socket.leave(tripId);
-            console.log(`📡 ${socket.id} left room: ${tripId}`);
-        });
+  io.on('connection', (socket) => {
+    console.log(`Socket connected: ${socket.id}`);
 
-        // Manager joins all active trip rooms
-        socket.on('join:all', async () => {
-            socket.join('manager');
-            console.log(`📡 ${socket.id} → manager (all trips)`);
-        });
-
-        // Join role-based room
-        socket.on('join:role', (role) => {
-            socket.join(`role:${role}`);
-            console.log(`📡 ${socket.id} → role:${role}`);
-        });
-
-        socket.on('disconnect', () => {
-            console.log(`🔌 Disconnected: ${socket.id}`);
-        });
+    socket.on('join_as_manager', () => {
+      socket.join('managers');
+      console.log(`${socket.id} joined as manager`);
     });
+
+    socket.on('join_trip', (tripCode) => {
+      socket.join(`trip:${tripCode}`);
+      console.log(`${socket.id} joined trip room: trip:${tripCode}`);
+    });
+
+    socket.on('join_as_gate', (factoryId) => {
+      socket.join(`gate:${factoryId}`);
+      console.log(`${socket.id} joined gate room: gate:${factoryId}`);
+    });
+
+    socket.on('join_as_supplier', (supplierId) => {
+      socket.join(`supplier:${supplierId}`);
+      console.log(`${socket.id} joined supplier room: supplier:${supplierId}`);
+    });
+
+    socket.on('disconnect', () => {
+      console.log(`Socket disconnected: ${socket.id}`);
+    });
+  });
+
+  return io;
 }
 
-/**
- * Emit event to a specific trip room + manager room.
- */
-function emitTripEvent(io, tripId, eventName, data) {
-    io.to(tripId).to('manager').emit(eventName, { tripId, ...data });
+function getIO() {
+  if (!io) throw new Error('Socket.io not initialized');
+  return io;
 }
 
-/**
- * Emit event to all clients in a role.
- */
-function emitRoleEvent(io, role, eventName, data) {
-    io.to(`role:${role}`).emit(eventName, data);
-}
-
-module.exports = { setupSocketHandlers, emitTripEvent, emitRoleEvent };
+module.exports = { initSocket, getIO };

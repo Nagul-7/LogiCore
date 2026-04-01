@@ -1,45 +1,30 @@
 const { createClient } = require('redis');
+require('dotenv').config();
 
-/**
- * Redis client for LogiCore.
- * Used for: live trip state cache, JWT session storage, Socket.io pub-sub.
- */
 const redisClient = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    url: process.env.REDIS_URL,
+    socket: {
+        reconnectStrategy: (retries) => {
+            if (retries > 20) {
+                return new Error('Redis max retries reached');
+            }
+            return Math.min(retries * 100, 3000);
+        }
+    }
 });
 
-redisClient.on('error', (err) => {
-    console.error('Redis client error:', err.message);
-});
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('connect', () => console.log('Redis connected'));
 
-redisClient.on('connect', () => {
-    console.log('✅ Redis connected');
-});
-
-/**
- * Test Redis connectivity.
- * @returns {Promise<boolean>}
- */
 async function testRedisConnection() {
     try {
-        if (!redisClient.isOpen) {
-            await redisClient.connect();
-        }
+        if (!redisClient.isOpen) await redisClient.connect();
         await redisClient.ping();
         return true;
     } catch (err) {
-        console.error('Redis connection failed:', err.message);
+        console.error('Redis connection test error', err);
         return false;
     }
 }
 
-/**
- * Connect to Redis (call once at startup).
- */
-async function connectRedis() {
-    if (!redisClient.isOpen) {
-        await redisClient.connect();
-    }
-}
-
-module.exports = { redisClient, testRedisConnection, connectRedis };
+module.exports = { redisClient, testRedisConnection };

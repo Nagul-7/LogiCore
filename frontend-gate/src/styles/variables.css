@@ -1,0 +1,40 @@
+:root {
+    --color-sidebar-bg: #1E3A5F;
+    --color-sidebar-active: #0EA5E9;
+    --color-sidebar-text-active: #FFFFFF;
+    --color-sidebar-text: #94A3B8;
+    --color-sidebar-hover: rgba(255, 255, 255, 0.08);
+
+    --color-page-bg: #F8FAFC;
+    --color-card-bg: #FFFFFF;
+    --color-card-border: #E2E8F0;
+
+    --color-text-primary: #1E293B;
+    --color-text-secondary: #64748B;
+
+    --color-primary-btn: #2563EB;
+    --color-primary-btn-hover: #1D4ED8;
+    --color-btn-text: #FFFFFF;
+
+    --color-success: #16A34A;
+    --color-success-bg: #DCFCE7;
+
+    --color-warning: #D97706;
+    --color-warning-bg: #FEF9C3;
+
+    --color-danger: #DC2626;
+    --color-danger-bg: #FEE2E2;
+
+    --color-info: #2563EB;
+    --color-info-bg: #DBEAFE;
+
+    --color-muted: #64748B;
+    --color-muted-bg: #F1F5F9;
+
+    --color-table-header-bg: #F8FAFC;
+    --color-table-row-alt: #FAFAFA;
+    --color-table-hover: #EFF6FF;
+    --color-table-border: #F1F5F9;
+
+    --font-family-base: 'Inter', sans-serif;
+}

@@ -1,0 +1,14 @@
+:root {
+    --color-page-bg: #111827;
+    --color-card-bg: #1F2937;
+
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #9CA3AF;
+
+    --color-primary-btn: #22C55E;
+    --color-btn-text: #111827;
+
+    --color-danger: #DC2626;
+
+    --font-family-base: 'Noto Sans Tamil', 'Inter', sans-serif;
+}

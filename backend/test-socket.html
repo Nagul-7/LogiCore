@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head><title>Socket Test</title></head>
+<body>
+<h2>LogiCore Socket.io Test</h2>
+<div id="status">Connecting...</div>
+<div id="events" style="font-family:monospace;font-size:13px;"></div>
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script>
+const socket = io('http://localhost:3000');
+const status = document.getElementById('status');
+const events = document.getElementById('events');
+
+socket.on('connect', () => {
+  status.textContent = 'Connected: ' + socket.id;
+  status.style.color = 'green';
+  socket.emit('join_as_manager');
+  addEvent('Joined as manager');
+});
+
+socket.on('trip:gps_update', (data) => {
+  addEvent('GPS UPDATE: ' + JSON.stringify(data));
+});
+
+socket.on('inventory:alert', (data) => {
+  addEvent('INVENTORY ALERT: ' + JSON.stringify(data));
+});
+
+socket.on('trip:plan_changed', (data) => {
+  addEvent('PLAN CHANGED: ' + JSON.stringify(data));
+});
+
+function addEvent(msg) {
+  events.innerHTML = '<div>' + new Date().toLocaleTimeString() + ' - ' + msg + '</div>' + events.innerHTML;
+}
+</script>
+</body>
+</html>
