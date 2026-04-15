@@ -87,7 +87,7 @@ export default function ActiveTripsTable() {
                   <td className="px-3 text-sm text-foreground">{t.driver_name}</td>
                   <td className="px-3 text-sm text-foreground">{t.material_type}</td>
                   <td className="px-3 text-sm text-foreground">{t.quantity_kg} kg</td>
-                  <td className="px-3 text-sm text-foreground">{t.eta ? format(new Date(t.eta), 'p') : '-'}</td>
+                  <td className="px-3 text-sm text-foreground">{t.eta && !isNaN(new Date(t.eta).getTime()) ? format(new Date(t.eta), 'p') : '-'}</td>
                   <td className="px-3">
                     <span className={`text-[11px] font-semibold px-[6px] py-[3px] rounded-[999px] ${getStatusColor(t.status)}`}>{getStatusLabel(t.status)}</span>
                   </td>

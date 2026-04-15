@@ -20,7 +20,7 @@ export default function LoginScreen() {
             step === 'badge' ? setBadgeId(p => p.slice(0,-1)) : setPin(p => p.slice(0,-1));
             return;
         }
-        if (step === 'badge' && badgeId.length < 12) setBadgeId(p => p + val);
+        if (step === 'badge' && badgeId.length < 10) setBadgeId(p => p + val);
         if (step === 'pin'   && pin.length < 6)      setPin(p => p + val);
     };
 
@@ -113,7 +113,7 @@ export default function LoginScreen() {
             )}
 
             <p style={{ color: '#334155', fontSize: '11px', marginTop: '24px' }}>
-                Demo: Badge GATE-001 · PIN 123456
+                Demo: Badge 9000000003 · PIN 123456
             </p>
         </div>
     );

@@ -44,7 +44,7 @@ export default function LiveMapSection() {
           <div key={t.trip_code} className="border border-border rounded-lg p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-foreground">{t.trip_code}</p>
-              <p className="text-xs text-muted-foreground mt-1">ETA {t.eta ? format(new Date(t.eta), 'p') : '-'}</p>
+              <p className="text-xs text-muted-foreground mt-1">ETA {t.eta && !isNaN(new Date(t.eta).getTime()) ? format(new Date(t.eta), 'p') : '-'}</p>
             </div>
             <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
               t.status === 'en_route' ? 'bg-success/10 text-success' : 

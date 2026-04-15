@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
 import { useAuth } from './AuthContext';
+import socket from '../lib/socket';
 
 const ActiveTripContext = createContext(null);
 
@@ -30,7 +31,14 @@ export function ActiveTripProvider({ children }) {
     useEffect(() => {
         fetchActiveTrip();
         const interval = setInterval(fetchActiveTrip, 60_000);
-        return () => clearInterval(interval);
+        
+        const handleTripUpdate = () => fetchActiveTrip();
+        socket.on('trip:plan_changed', handleTripUpdate);
+        
+        return () => {
+            clearInterval(interval);
+            socket.off('trip:plan_changed', handleTripUpdate);
+        };
     }, [fetchActiveTrip]);
 
     return (

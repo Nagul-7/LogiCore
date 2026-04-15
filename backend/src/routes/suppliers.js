@@ -29,9 +29,20 @@ router.post('/:id/confirm', async (req, res) => {
         if (tripRes.rows.length === 0) return res.status(404).json({ error: 'Trip not found or does not belong to this supplier' });
         
         const trip = tripRes.rows[0];
+        
+        // Update status and get full trip
+        const updatedTripRes = await pool.query('UPDATE trips SET status = $1 WHERE id = $2 RETURNING *', ['ready', trip.id]);
+        const updatedTrip = updatedTripRes.rows[0];
+
         await pool.query(`INSERT INTO trip_events (trip_id, event_type, description) VALUES ($1, 'supplier_confirmed', 'Supplier confirmed pickup')`, [trip.id]);
         
-        res.json({ success: true });
+        try {
+            const { getIO } = require('../socket');
+            getIO().to(`trip:${trip_code}`).emit('trip:plan_changed', updatedTrip);
+            getIO().to('managers').emit('trip:plan_changed', updatedTrip);
+        } catch (err) { console.error('Socket error emitting plan_changed:', err); }
+
+        res.json({ success: true, trip: updatedTrip });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -54,6 +65,13 @@ router.post('/:id/delay', async (req, res) => {
         
         await pool.query(`INSERT INTO trip_events (trip_id, event_type, description) VALUES ($1, 'supplier_delay', $2)`, [trip.id, `Supplier delayed by ${delay_minutes} mins: ${reason}`]);
         
+        try {
+            const { getIO } = require('../socket');
+            // send the updated trip to clients so delay applies real-time
+            getIO().to(`trip:${trip_code}`).emit('trip:plan_changed', trip);
+            getIO().to('managers').emit('trip:plan_changed', trip);
+        } catch (err) { console.error('Socket error emitting plan_changed:', err); }
+
         res.json({ eta: trip.eta });
     } catch (e) {
         res.status(500).json({ error: e.message });

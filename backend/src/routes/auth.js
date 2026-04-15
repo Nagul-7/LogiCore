@@ -29,10 +29,15 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             }
         }
 
-        // 2. Try users table (email login)
-        if (!user && email) {
-            const r = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-            if (r.rows.length) {
+        // 2. Try users table (email or phone login)
+        if (!user) {
+            let r;
+            if (email) {
+                r = await pool.query('SELECT * FROM users WHERE email = $1 AND is_active = true', [email]);
+            } else if (phone) {
+                r = await pool.query('SELECT * FROM users WHERE phone = $1 AND is_active = true', [phone]);
+            }
+            if (r && r.rows.length) {
                 user = r.rows[0];
                 role = user.role;
                 if (user.supplier_id) extraClaims.supplierId = user.supplier_id;

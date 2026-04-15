@@ -148,15 +148,13 @@ router.patch('/:trip_code', async (req, res) => {
          const reason = req.body.change_reason || 'Trip updated';
          await pool.query(`INSERT INTO trip_events (trip_id, event_type, description) VALUES ($1, 'updated', $2)`, [trip.id, reason]);
          
-         if (req.body.quantity_kg !== undefined) {
-             try {
-                 const { getIO } = require('../socket');
-                 const io = getIO();
-                 io.to(`trip:${req.params.trip_code}`).emit('trip:plan_changed', { trip_code: req.params.trip_code, new_quantity: req.body.quantity_kg, reason: reason });
-                 io.to('managers').emit('trip:plan_changed', { trip_code: req.params.trip_code, new_quantity: req.body.quantity_kg });
-             } catch (err) {
-                 console.error('Socket error emitting plan_changed:', err);
-             }
+         try {
+             const { getIO } = require('../socket');
+             const io = getIO();
+             io.to(`trip:${req.params.trip_code}`).emit('trip:plan_changed', trip);
+             io.to('managers').emit('trip:plan_changed', trip);
+         } catch (err) {
+             console.error('Socket error emitting plan_changed:', err);
          }
          
          res.json(trip);
