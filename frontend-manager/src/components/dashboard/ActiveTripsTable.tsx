@@ -9,20 +9,21 @@ export default function ActiveTripsTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const base = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
-    fetch(`${base}/api/v1/trips`)
-      .then(r => r.json())
-      .then(data => {
-        setLocalTrips(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Trips fetch error:', err);
-        setLoading(false);
-      });
+    import("../../lib/api").then(({ default: api }) => {
+      api.get("/api/v1/trips")
+        .then(r => {
+          setLocalTrips(Array.isArray(r.data) ? r.data : []);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Trips fetch error:", err);
+          setLoading(false);
+        });
+    });
   }, []);
 
-  const trips = store.trips.length > 0 ? store.trips : localTrips;
+  const rawTrips = store.trips.length > 0 ? store.trips : localTrips;
+  const trips = Array.isArray(rawTrips) ? rawTrips : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

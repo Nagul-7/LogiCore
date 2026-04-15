@@ -15,7 +15,7 @@ const validate = (schema) => {
 // Common schemas can go here
 const schemas = {
     login: Joi.object({
-        email: Joi.string().email().optional(),
+        email: Joi.string().email({ tlds: { allow: false } }).optional(),
         phone: Joi.string().optional(),
         password: Joi.string().required()
     }).or('email', 'phone')
