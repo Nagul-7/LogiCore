@@ -7,7 +7,9 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const query = `
-            SELECT d.*, t.plate_number, t.model as truck_model, t.capacity_kg, t.truck_type,
+            SELECT d.id, d.name, d.phone, d.email, d.language, d.reliability_score,
+                   d.is_online, d.last_seen,
+                   t.plate_number, t.model as truck_model, t.capacity_kg, t.truck_type,
                    tr.trip_code as active_trip
             FROM drivers d
             LEFT JOIN trucks t ON t.driver_id = d.id
@@ -15,6 +17,36 @@ router.get('/', async (req, res) => {
         `;
         const result = await pool.query(query);
         res.json(result.rows);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// GET /api/v1/drivers/:id  — full profile for driver app
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const driverRes = await pool.query(`
+            SELECT d.id, d.name, d.phone, d.email, d.language, d.reliability_score,
+                   d.is_online, d.last_seen, d.created_at,
+                   t.plate_number, t.model as truck_model, t.capacity_kg, t.truck_type
+            FROM drivers d
+            LEFT JOIN trucks t ON t.driver_id = d.id
+            WHERE d.id = $1
+        `, [id]);
+
+        if (driverRes.rows.length === 0) return res.status(404).json({ error: 'Driver not found' });
+        const driver = driverRes.rows[0];
+
+        // Aggregate completed trip count
+        const countRes = await pool.query(
+            `SELECT COUNT(*) as completed_trips FROM trips WHERE driver_id = $1 AND status = 'completed'`,
+            [id]
+        );
+        driver.completed_trips = parseInt(countRes.rows[0].completed_trips, 10);
+
+        res.json(driver);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

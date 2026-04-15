@@ -27,6 +27,14 @@ router.get('/', async (req, res) => {
             query += ` AND t.factory_id = $${idx++}`;
             params.push(req.query.factory_id);
         }
+        if (req.query.driver_id) {
+            query += ` AND t.driver_id = $${idx++}`;
+            params.push(req.query.driver_id);
+        }
+        // ?active=true  — returns trips that are not completed/cancelled
+        if (req.query.active === 'true') {
+            query += ` AND t.status NOT IN ('completed', 'cancelled')`;
+        }
         
         const result = await pool.query(query, params);
         res.json(result.rows);

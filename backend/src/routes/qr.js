@@ -17,12 +17,13 @@ router.post('/generate', async (req, res) => {
         const token = uuidv4();
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
         
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
         await pool.query(`
             INSERT INTO qr_tokens (trip_id, token_hash, expires_at)
-            VALUES ($1, $2, NOW() + INTERVAL '2 hours')
-        `, [tripId, tokenHash]);
+            VALUES ($1, $2, $3)
+        `, [tripId, tokenHash, expiresAt]);
         
-        res.json({ token });
+        res.json({ token, expires_at: expiresAt.toISOString() });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
