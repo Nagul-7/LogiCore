@@ -154,7 +154,7 @@ export default function LoginScreen() {
             )}
 
             <p style={{ color: '#4B5563', fontSize: '11px', marginTop: '24px' }}>
-                Demo: Phone 9876543201 · PIN demo1234
+                Demo: Phone 9876543201 · PIN 123456
             </p>
         </div>
     );

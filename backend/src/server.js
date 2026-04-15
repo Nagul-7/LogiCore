@@ -62,6 +62,8 @@ const authLimiter = rateLimit({
 app.use('/api/', generalLimiter);
 
 // ── Health check (public) ─────────────────────────────────────
+app.get('/', (req, res) => res.redirect('/api/health'));
+
 app.get('/api/health', async (req, res) => {
     try {
         await pool.query('SELECT 1');

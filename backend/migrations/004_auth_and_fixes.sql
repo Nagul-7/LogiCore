@@ -35,14 +35,14 @@ ALTER TABLE epods ADD COLUMN IF NOT EXISTS signature_b64 TEXT;
 ALTER TABLE epods ADD COLUMN IF NOT EXISTS gate_officer_id INTEGER REFERENCES users(id);
 
 -- 5. Seed demo users
--- All passwords are bcrypt hash of "demo1234"
--- Hash generated with: bcrypt.hashSync('demo1234', 10)
+-- All passwords are bcrypt hash of "123456"
+-- Hash generated with: bcrypt.hashSync('123456', 10)
 INSERT INTO users (name, email, phone, password_hash, role, factory_id) VALUES
 (
   'Arjun Manager',
   'manager@logicore.demo',
   '9000000001',
-  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- demo1234
+  '$2a$10$Nm0taGNeuTVZrsMs9hpYD.db//xRzmo5fTBpSQ0YFzHWJMRdAwOva', -- 123456
   'manager',
   1
 ),
@@ -50,7 +50,7 @@ INSERT INTO users (name, email, phone, password_hash, role, factory_id) VALUES
   'Gate Guard Selvam',
   'gate@logicore.demo',
   '9000000003',
-  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  '$2a$10$Nm0taGNeuTVZrsMs9hpYD.db//xRzmo5fTBpSQ0YFzHWJMRdAwOva',
   'gate_guard',
   1
 )
@@ -62,12 +62,12 @@ INSERT INTO users (name, email, phone, password_hash, role, supplier_id) VALUES
   'Rajan Supplier',
   'supplier@logicore.demo',
   '9000000002',
-  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  '$2a$10$Nm0taGNeuTVZrsMs9hpYD.db//xRzmo5fTBpSQ0YFzHWJMRdAwOva',
   'supplier',
   1
 )
 ON CONFLICT (email) DO NOTHING;
 
--- 6. Seed driver password hashes (same demo password "demo1234")
-UPDATE drivers SET password_hash = '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+-- 6. Seed driver password hashes (same demo password "123456")
+UPDATE drivers SET password_hash = '$2a$10$Nm0taGNeuTVZrsMs9hpYD.db//xRzmo5fTBpSQ0YFzHWJMRdAwOva'
 WHERE password_hash IS NULL;

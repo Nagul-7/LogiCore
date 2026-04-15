@@ -113,7 +113,7 @@ export default function LoginScreen() {
             )}
 
             <p style={{ color: '#334155', fontSize: '11px', marginTop: '24px' }}>
-                Demo: Badge GATE-001 · PIN demo1234
+                Demo: Badge GATE-001 · PIN 123456
             </p>
         </div>
     );

@@ -81,7 +81,7 @@ export default function LoginScreen() {
                 </form>
 
                 <p style={{ color: '#94A3B8', fontSize: '12px', textAlign: 'center', marginTop: '20px' }}>
-                    Demo: supplier@logicore.demo · demo1234
+                    Demo: supplier@logicore.demo · 123456
                 </p>
             </div>
         </div>
