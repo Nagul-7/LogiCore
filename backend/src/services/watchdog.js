@@ -9,7 +9,7 @@ function startWatchdog() {
 
       // Check 1: Driver no-show detection
       const noshowResult = await pool.query(`
-        SELECT t.trip_code, t.driver_id, d.name as driver_name
+        SELECT t.id, t.trip_code, t.driver_id, d.name as driver_name
         FROM trips t
         JOIN drivers d ON d.id = t.driver_id
         WHERE t.status = 'assigned'
@@ -17,7 +17,7 @@ function startWatchdog() {
         AND t.depart_by > NOW() - INTERVAL '60 minutes'
         AND NOT EXISTS (
           SELECT 1 FROM telemetry_gps g
-          WHERE g.trip_id = t.trip_code
+          WHERE g.trip_id = t.id
           AND g.time > NOW() - INTERVAL '15 minutes'
         )
       `);
@@ -33,9 +33,9 @@ function startWatchdog() {
         try {
           await pool.query(
             `INSERT INTO trip_events (trip_id, event_type, description) VALUES ($1, 'noshow_detected', 'Watchdog detected driver has not departed')`,
-            [trip.trip_code]
+            [trip.id]
           );
-        } catch (_) { /* trip_events may use id, skip silently */ }
+        } catch (_) { /* skip silently */ }
       }
 
       // Check 2: Stall detection
@@ -45,11 +45,11 @@ function startWatchdog() {
         JOIN drivers d ON d.id = t.driver_id
         WHERE t.status = 'en_route'
         AND EXISTS (
-          SELECT 1 FROM telemetry_gps g WHERE g.trip_id = t.trip_code
+          SELECT 1 FROM telemetry_gps g WHERE g.trip_id = t.id
         )
         AND NOT EXISTS (
           SELECT 1 FROM telemetry_gps g
-          WHERE g.trip_id = t.trip_code
+          WHERE g.trip_id = t.id
           AND g.time > NOW() - INTERVAL '10 minutes'
         )
       `);

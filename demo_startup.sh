@@ -3,8 +3,7 @@ echo "================================================"
 echo "  Starting LogiCore Monorepo Services"
 echo "================================================"
 
-# Start PostgreSQL if not running
-sudo systemctl start postgresql@18-main 2>/dev/null || sudo systemctl start postgresql 2>/dev/null
+# PostgreSQL is expected to be running already
 
 # Kill anything on our ports
 for port in 3000 3001 3002 3003 3004; do
